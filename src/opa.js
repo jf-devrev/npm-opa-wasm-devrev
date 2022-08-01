@@ -425,4 +425,20 @@ module.exports = {
     );
     return new LoadedPolicy(policy, memory, minorVersion);
   },
+  async opaInit(memoryDescriptor = {}, customBuiltins = {}) {
+    const regoWasm = fs.readFileSync("policy.wasm");
+    // back-compat, second arg used to be a number: 'memorySize', with default of 5
+    if (typeof memoryDescriptor === "number") {
+      memoryDescriptor = { initial: memoryDescriptor };
+    }
+    memoryDescriptor.initial = memoryDescriptor.initial || 5;
+
+    const memory = new WebAssembly.Memory(memoryDescriptor);
+    const { policy, minorVersion } = await _loadPolicy(
+      regoWasm,
+      memory,
+      customBuiltins,
+    );
+    return new LoadedPolicy(policy, memory, minorVersion);
+  },
 };
